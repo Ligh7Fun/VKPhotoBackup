@@ -88,6 +88,9 @@ class Backup:
             else:
                 log.log(f'Файл {image_name} уже есть в папке.')
 
+    def start_backup(self):
+        pass
+
 
 if __name__ == '__main__':
     load_dotenv()
@@ -96,9 +99,8 @@ if __name__ == '__main__':
     USER_ID = os.getenv('USER_ID')
     log = Logger()
     vk = VK(VK_TOKEN, USER_ID)
-    photos_list = vk.get_photos(count=5)
+    photos_list = vk.get_photos(count=12)
     back = Backup()
     back_get_img = back.get_images(photos_list)
-    pprint(back_get_img)
     back.save_json_file(back_get_img)
     back.save_photos_local(back_get_img)
