@@ -2,3 +2,5 @@
 .idea/
 venv/
 VKPhotoBackup.log
+VKPhotoBackup.json
+downloads_*/
