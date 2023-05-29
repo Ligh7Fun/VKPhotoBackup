@@ -1,6 +1,7 @@
 import requests
 from logger import Logger
 
+
 class VK:
     _URL = 'https://api.vk.com/method/'
     _PHOTOS = 'photos.get'
@@ -29,6 +30,7 @@ class VK:
         response = requests.get(url, params={**self.params, **params})
         response.raise_for_status()
         response_json = response.json()
+
         if response_json.get('error'):
             raise Exception(response_json.get('error').get('error_msg'))
 
@@ -64,10 +66,6 @@ class VK:
     ) -> dict:
         """
         Метод для получения фотографий пользователя ВКонтакте
-        :param album_id:
-        :param extended:
-        :param photo_sizes:
-        :param count:
         :return: Словарь с информацией о фотографиях пользователя
         """
         url = self._URL + self._PHOTOS

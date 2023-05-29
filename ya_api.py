@@ -1,9 +1,10 @@
 import requests
+from requests import Response
+
 from logger import Logger
 
 
 class YandexUploader:
-
     _URL = 'https://cloud-api.yandex.net/v1/disk/resources'
     _UPLOAD = '/upload'
     _FOLDER = '/netology/'
@@ -14,12 +15,18 @@ class YandexUploader:
         self.folder = self._FOLDER + folder
 
     def _get_headers(self) -> dict:
+        """
+        Метод для возвращает заголовок http запроса
+        """
         return {
             'Content-Type': 'application/json',
             'Authorization': f'OAuth {self.token}',
         }
 
-    def _get_folder(self):
+    def _get_folder(self) -> Response:
+        """
+        Метод для проверки наличия каталога
+        """
         url = self._URL
         params = {
             'path': self.folder
@@ -28,6 +35,9 @@ class YandexUploader:
         return response
 
     def _create_folder(self) -> None:
+        """
+        Метод для создания каталога для загрузки файлов
+        """
         folder_response = self._get_folder()
         if folder_response.status_code == 404:
             self.log.log(f'Каталога {self.folder} нет, создаем.')
@@ -43,6 +53,11 @@ class YandexUploader:
             folder_response.raise_for_status()
 
     def upload_files(self, files_list: list) -> None:
+        """
+        Загрузка файлов на Яндекс.Диск
+        :param files_list: Список ссылок на фотографии для загрузки
+        :return: None
+        """
         self._create_folder()
         url = self._URL + self._UPLOAD
 
@@ -59,4 +74,4 @@ class YandexUploader:
             }
             response = requests.post(url=url, headers=self._get_headers(), params=params)
             response.raise_for_status()
-            self.log.log(f'Файл {path_to_file} загружен на Яндекс.Диск.')
+            self.log.log(f'Файл {path_to_file} загружен на Яндекс.Диск')

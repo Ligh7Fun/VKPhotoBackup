@@ -4,19 +4,15 @@ import json
 import os
 from logger import Logger
 from vk_api import VK
-from pprint import pprint
 from ya_api import YandexUploader
 
 
-class Backup:
+class VKBackup:
 
     def __init__(self):
         self.image_likes = set()
 
-    def _set_image_name(
-            self,
-            image: dict
-    ) -> str:
+    def _set_image_name(self, image: dict) -> str:
         """
         Возвращает имя изображения по количеству лайков,
         если количество лайков совпадает, добавляет дату загрузки
@@ -33,11 +29,14 @@ class Backup:
 
     @staticmethod
     def get_album_list(albums_json: dict) -> list:
+        """
+        Метод для получения списка альбомов, их заголовков и количества фото
+        """
         albums = []
         album = albums_json.get('response', {})
         if album.get('count'):
             for item in album.get('items', []):
-                albums.append(item['id'])
+                albums.append((item['id'], item['title'], item['size']))
         else:
             log.log('Альбомы не найдены.')
             raise Exception('Альбомы не найдены')
@@ -94,33 +93,34 @@ class Backup:
             if not os.path.isfile(filepath):
                 with open(filepath, 'wb') as file:
                     file.write(response.content)
-                    log.log(f'Файл {image_name} сохранен.')
+                    log.log(f'Файл {image_name} сохранен на локальном диске.')
             else:
-                log.log(f'Файл {image_name} уже есть в локальной папке, пропускаем.')
-
-    def start_backup(self):
-        pass
+                log.log(f'Файл {image_name} уже есть на локальном диске, пропускаем.')
 
 
 if __name__ == '__main__':
-    load_dotenv()
+    load_dotenv()  # Получаем токены и user_id из файла .env
     VK_TOKEN = os.getenv('VK_TOKEN')
     YA_TOKEN = os.getenv('YA_TOKEN')
     USER_ID = os.getenv('USER_ID')
     log = Logger()
+    backup = VKBackup()
     vk = VK(VK_TOKEN, USER_ID)
-    ya_disk = YandexUploader(YA_TOKEN, 'folder_'+USER_ID)
+    ya_disk = YandexUploader(YA_TOKEN, 'download_folder_' + USER_ID)
+
     my_albums = vk.get_albums()  # Получаем словарь с альбомами
-
-
-    back = Backup()
-    albums_list = back.get_album_list(my_albums)
-    # print(vk.get_user_id('keep3r_str'))
-    photos_album = vk.get_photos(album_id='-6', count=100)  # фотографии с альбома
-    image_url = back.get_images(photos_album)  # Список ссылок на фотографии
-    # pprint(image_url)
-    # print()
-    ya_disk.upload_files(image_url)
-
-    # back.save_json_file(image_url, file_name='VKPhotoBackup.json')
-    # back.save_photos_local(image_url)
+    albums_list = backup.get_album_list(my_albums)  # Получаем список альбомов и их названия
+    print('Для скачивания доступны следующие альбомы:')
+    for index, album in enumerate(albums_list, start=1):
+        print(f'{index}. {album[1]} ({album[2]} фото)')
+    album_id = int(input('\nНомер альбома для скачивания: '))
+    count_photo = int(input('Сколько фото скачать(по умолчанию = 5): ') or 5)
+    try:
+        # Фотографии с выбранного альбома
+        photos_album = vk.get_photos(album_id=albums_list[album_id-1][0], count=count_photo)
+        img_url = backup.get_images(photos_album)  # Список ссылок на фотографии
+        ya_disk.upload_files(img_url)  # Загружаем файлы из альбома на диск
+        backup.save_json_file(img_url, file_name='VKPhotoBackup.json')  # Json-файл с информацией по файлу
+        backup.save_photos_local(img_url)  # Скачать файлы и на локальный диск
+    except IndexError:
+        log.log('Некорректно указан ID альбома.')
