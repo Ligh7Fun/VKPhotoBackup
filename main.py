@@ -102,13 +102,18 @@ if __name__ == '__main__':
     load_dotenv()  # Получаем токены и user_id из файла .env
     VK_TOKEN = os.getenv('VK_TOKEN')
     YA_TOKEN = os.getenv('YA_TOKEN')
-    USER_ID = os.getenv('USER_ID')
     log = Logger()
     backup = VKBackup()
-    vk = VK(VK_TOKEN, USER_ID)
+    vk = VK(VK_TOKEN)
+    print(f'**** Запуск ****')
+    USER_ID = input('Введите USER_ID, если его нет введите короткое имя,'
+                    ' например keep3r_str (https://vk.com/keep3r_str):')
+    if not USER_ID.isdigit():
+        USER_ID = str(vk.get_user_id(USER_ID))
+
     ya_disk = YandexUploader(YA_TOKEN, 'download_folder_' + USER_ID)
 
-    my_albums = vk.get_albums()  # Получаем словарь с альбомами
+    my_albums = vk.get_albums(USER_ID)  # Получаем словарь с альбомами
     albums_list = backup.get_album_list(my_albums)  # Получаем список альбомов и их названия
     print('Для скачивания доступны следующие альбомы:')
     for index, album in enumerate(albums_list, start=1):
@@ -117,7 +122,7 @@ if __name__ == '__main__':
     count_photo = int(input('Сколько фото скачать(по умолчанию = 5): ') or 5)
     try:
         # Фотографии с выбранного альбома
-        photos_album = vk.get_photos(album_id=albums_list[album_id-1][0], count=count_photo)
+        photos_album = vk.get_photos(user_id=USER_ID, album_id=albums_list[album_id-1][0], count=count_photo)
         img_url = backup.get_images(photos_album)  # Список ссылок на фотографии
         ya_disk.upload_files(img_url)  # Загружаем файлы из альбома на диск
         backup.save_json_file(img_url, file_name='VKPhotoBackup.json')  # Json-файл с информацией по файлу

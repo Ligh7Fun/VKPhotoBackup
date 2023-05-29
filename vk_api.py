@@ -12,18 +12,16 @@ class VK:
     def __init__(
             self,
             access_token: str,
-            user_id: str,
             version: str = '5.131'
     ) -> None:
         self.access_token = access_token
-        self.user_id = user_id
         self.version = version
         self.params = {'access_token': self.access_token, 'v': self.version}
 
-    def get_albums(self) -> dict:
+    def get_albums(self, user_id) -> dict:
         url = self._URL + self._ALBUMS
         params = {
-            'owner_id': self.user_id,
+            'owner_id': user_id,
             'need_system': 1
         }
 
@@ -32,7 +30,7 @@ class VK:
         response_json = response.json()
 
         if response_json.get('error'):
-            raise Exception(response_json.get('error').get('error_msg'))
+            raise Exception('Приватный профиль, нет возможности скачать фото')
 
         return response_json
 
@@ -59,6 +57,7 @@ class VK:
 
     def get_photos(
             self,
+            user_id: str,
             album_id: str = 'profile',
             extended: int = 1,
             photo_sizes: int = 1,
@@ -70,7 +69,7 @@ class VK:
         """
         url = self._URL + self._PHOTOS
         params = {
-            'owner_id': self.user_id,
+            'owner_id': user_id,
             'album_id': album_id,
             'extended': extended,
             'photo_sizes': photo_sizes,
