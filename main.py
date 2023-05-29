@@ -99,7 +99,7 @@ class VKBackup:
 
 
 if __name__ == '__main__':
-    load_dotenv()  # Получаем токены и user_id из файла .env
+    load_dotenv()  # Получаем токены из файла .env
     VK_TOKEN = os.getenv('VK_TOKEN')
     YA_TOKEN = os.getenv('YA_TOKEN')
     log = Logger()
