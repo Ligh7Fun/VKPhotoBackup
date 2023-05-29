@@ -78,11 +78,11 @@ class VKBackup:
             log.log(f'Файл {file_name} успешно сохранен.')
 
     @staticmethod
-    def save_photos_local(images_url: list) -> None:
+    def save_photos_local(images_url: list, album: int) -> None:
         """
         Сохранение изображений на локальный диск
         """
-        user_folder = f'downloads_folder_{USER_ID}'
+        user_folder = f'downloads_folder_{USER_ID}_{album}'
 
         if not os.path.exists(user_folder):
             os.makedirs(user_folder)
@@ -105,13 +105,11 @@ if __name__ == '__main__':
     log = Logger()
     backup = VKBackup()
     vk = VK(VK_TOKEN)
-    print(f'**** Запуск ****')
+    log.log('**** Запуск ****')
     USER_ID = input('Введите USER_ID, если его нет введите короткое имя,'
                     ' например keep3r_str (https://vk.com/keep3r_str):')
     if not USER_ID.isdigit():
         USER_ID = str(vk.get_user_id(USER_ID))
-
-    ya_disk = YandexUploader(YA_TOKEN, 'download_folder_' + USER_ID)
 
     my_albums = vk.get_albums(USER_ID)  # Получаем словарь с альбомами
     albums_list = backup.get_album_list(my_albums)  # Получаем список альбомов и их названия
@@ -120,12 +118,14 @@ if __name__ == '__main__':
         print(f'{index}. {album[1]} ({album[2]} фото)')
     album_id = int(input('\nНомер альбома для скачивания: '))
     count_photo = int(input('Сколько фото скачать(по умолчанию = 5): ') or 5)
+    ya_disk = YandexUploader(YA_TOKEN, f'download_folder_{USER_ID}_{album_id}')
     try:
         # Фотографии с выбранного альбома
         photos_album = vk.get_photos(user_id=USER_ID, album_id=albums_list[album_id-1][0], count=count_photo)
         img_url = backup.get_images(photos_album)  # Список ссылок на фотографии
         ya_disk.upload_files(img_url)  # Загружаем файлы из альбома на диск
         backup.save_json_file(img_url, file_name='VKPhotoBackup.json')  # Json-файл с информацией по файлу
-        backup.save_photos_local(img_url)  # Скачать файлы и на локальный диск
+        backup.save_photos_local(img_url, album_id)  # Скачать файлы и на локальный диск
     except IndexError:
         log.log('Некорректно указан ID альбома.')
+    log.log('**** Готово ****')
