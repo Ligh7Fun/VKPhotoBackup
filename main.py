@@ -114,8 +114,8 @@ if __name__ == '__main__':
     my_albums = vk.get_albums(USER_ID)  # Получаем словарь с альбомами
     albums_list = backup.get_album_list(my_albums)  # Получаем список альбомов и их названия
     print('Для скачивания доступны следующие альбомы:')
-    for index, album in enumerate(albums_list, start=1):
-        print(f'{index}. {album[1]} ({album[2]} фото)')
+    for index, current_album in enumerate(albums_list, start=1):
+        print(f'{index}. {current_album[1]} ({current_album[2]} фото)')
     album_id = int(input('\nНомер альбома для скачивания: '))
     count_photo = int(input('Сколько фото скачать(по умолчанию = 5): ') or 5)
     ya_disk = YandexUploader(YA_TOKEN, f'download_folder_{USER_ID}_{album_id}')
