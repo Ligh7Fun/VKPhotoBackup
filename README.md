@@ -29,3 +29,7 @@ source venv/bin/activate
 ```
 pip install -r requirements.txt
 ```
+
+Переименовываем файл `.env_sample` в `.env` и указываем свои значения.
+
+Запускаем `main.py`
