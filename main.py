@@ -107,7 +107,7 @@ if __name__ == '__main__':
     vk = VK(VK_TOKEN)
     log.log('**** Запуск ****')
     USER_ID = input('Введите USER_ID, если его нет введите короткое имя,'
-                    ' например keep3r_str (https://vk.com/keep3r_str):')
+                    ' например obulygin91 (https://vk.com/obulygin91):')
     if not USER_ID.isdigit():
         USER_ID = str(vk.get_user_id(USER_ID))
 
